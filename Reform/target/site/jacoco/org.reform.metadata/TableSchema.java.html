@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TableSchema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Reform</a> &gt; <a href="index.source.html" class="el_package">org.reform.metadata</a> &gt; <span class="el_source">TableSchema.java</span></div><h1>TableSchema.java</h1><pre class="source lang-java linenums">package org.reform.metadata;
+
+import org.reform.util.TypeMappingUtil;
+
+import java.lang.reflect.Field;
+import java.util.*;
+
+public class TableSchema&lt;T&gt; {
+    private Class c;
+    private String tableName;
+    private HashSet&lt;ColumnData&gt; columnSchemas;
+    private HashMap&lt;Class, Boolean&gt; childClasses;
+    private HashSet&lt;Class&gt; parentClasses;
+    private HashSet&lt;EntityCardinality&gt; childCardinalities;
+<span class="fc" id="L15">    private Boolean inTheDatabase = false;</span>
+
+
+    /**
+     * Takes in an a class and maps the class's attributes to columns
+     * If class has reference to another class, a foreign key is made for the referenced class.
+     * @param c
+     */
+<span class="fc" id="L23">    public TableSchema(Class c) {</span>
+<span class="fc" id="L24">        this.c = c;</span>
+<span class="fc" id="L25">        this.tableName = c.getSimpleName().toLowerCase(Locale.ROOT);</span>
+<span class="fc" id="L26">        this.columnSchemas  = new HashSet&lt;ColumnData&gt;();</span>
+<span class="fc" id="L27">        this.childClasses = new HashMap&lt;Class,Boolean&gt;();</span>
+<span class="fc" id="L28">        this.parentClasses = new HashSet&lt;Class&gt;();</span>
+<span class="fc" id="L29">        this.childCardinalities = new HashSet&lt;EntityCardinality&gt;();</span>
+
+<span class="fc" id="L31">        createColumns();</span>
+<span class="fc" id="L32">        detectChildReferences();</span>
+//        detectChildCardinality();
+<span class="fc" id="L34">    }</span>
+
+<span class="nc" id="L36">    public Class getTableClass(){return c;}</span>
+
+<span class="fc" id="L38">    public String getTableName(){return tableName;}</span>
+
+    public Field[] getFields() {
+<span class="fc" id="L41">        return c.getDeclaredFields();</span>
+    }
+
+    /**
+     * Looks through all of the attributes in a class regardless of access modifier
+     * Creates columns based on the attribute's name and type
+     */
+    private void createColumns() {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">         for(Field f : getFields()) {</span>
+<span class="fc" id="L50">             String fieldName = f.getName();</span>
+<span class="fc" id="L51">             Class&lt;?&gt; fieldType = f.getType();</span>
+<span class="fc" id="L52">             ColumnData c = new ColumnData(fieldName, fieldType);</span>
+<span class="fc" id="L53">             columnSchemas.add(c);</span>
+         }
+<span class="fc" id="L55">    }</span>
+
+    public Set&lt;ColumnData&gt; getColumns() {
+<span class="nc" id="L58">        return columnSchemas;</span>
+    }
+
+    public ColumnData getColumn(Class c) {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        for(ColumnData c1 : columnSchemas) {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if(c.equals(c1)) {</span>
+<span class="nc" id="L64">                return c1;</span>
+            }
+<span class="nc" id="L66">        }</span>
+<span class="nc" id="L67">        return null;</span>
+    }
+
+
+    public Boolean hasChildEntities() {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        return !childClasses.isEmpty();</span>
+    }
+
+    //Returns false if a child table hasn't been created/visited
+    //Returns true if all of the table's children have been created
+    public Boolean allVisitedChildEntities() {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        for (Map.Entry mapElement : childClasses.entrySet()) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if(mapElement.getValue().equals(false)) {</span>
+<span class="nc" id="L80">                return false;</span>
+            }
+<span class="nc" id="L82">        }</span>
+<span class="nc" id="L83">        return true;</span>
+    }
+
+    public void setVisited(Class c) {
+<span class="nc" id="L87">        childClasses.put(c, true);</span>
+<span class="nc" id="L88">    }</span>
+
+<span class="nc" id="L90">    public HashSet&lt;Class&gt; getParentClasses() {return  parentClasses;</span>
+    }
+
+<span class="nc" id="L93">    public Set&lt;Class&gt; getChildClasses() {return (Set&lt;Class&gt;) childClasses.keySet();}</span>
+
+    public void addForeignKey(Class c) {
+<span class="nc" id="L96">        parentClasses.add(c);</span>
+<span class="nc" id="L97">    }</span>
+
+    /**
+     * Looks through all of the fields in the class.
+     * If the field is not a primitive or wrapper class (including String),
+     * it is assumed that it holds a reference to another class and a foreign key is created.
+     */
+
+    private void detectChildReferences() {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for(Field f :getFields()) {</span>
+<span class="fc" id="L107">            f.setAccessible(true);</span>
+<span class="fc" id="L108">            Class c = f.getType();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if(!TypeMappingUtil.isPrimitiveType(c)) {</span>
+<span class="fc" id="L110">                childClasses.put(c, false);</span>
+            }
+        }
+<span class="fc" id="L113">    }</span>
+
+    private void detectChildCardinality() {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        for(Field f : getFields()) {</span>
+<span class="nc" id="L117">            Class c = f.getType();</span>
+<span class="nc" id="L118">            EntityCardinality e = new EntityCardinality();</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if(!TypeMappingUtil.isPrimitiveType(c)) {</span>
+<span class="nc" id="L121">                e.setChildClass(c);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                if (!TypeMappingUtil.isCollection(c)) {</span>
+<span class="nc" id="L123">                    e.setChildCardinality(CardinalityType.ONE);</span>
+                } else {
+<span class="nc" id="L125">                    e.setChildCardinality(CardinalityType.MANY);</span>
+                }
+<span class="nc" id="L127">                childCardinalities.add(e);</span>
+            }
+        }
+<span class="nc" id="L130">    }</span>
+
+    //TODO: Clean up to string
+    @Override
+    public String toString() {
+<span class="fc" id="L135">        return tableName + &quot; table: &quot; + &quot;\n&quot; +</span>
+                &quot; Columns: &quot; + columnSchemas + &quot;\n&quot; +
+                &quot; Parent classes: &quot; + parentClasses + &quot;\n&quot; +
+                &quot; Child classes: &quot; + childClasses;
+    }
+
+    public Boolean isInTheDatabase() {
+<span class="nc" id="L142">        return inTheDatabase;</span>
+    }
+
+    public void setInTheDatabase(Boolean inTheDatabase) {
+<span class="nc" id="L146">        this.inTheDatabase = inTheDatabase;</span>
+<span class="nc" id="L147">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

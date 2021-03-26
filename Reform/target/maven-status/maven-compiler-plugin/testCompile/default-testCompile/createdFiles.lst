@@ -1,0 +1,13 @@
+metadataTest\DatabaseSchemaTest.class
+connectionTest\connectionSessionTest.class
+metadataTest\TableTest.class
+modelTest\PetTest.class
+modelTest\PersonTest.class
+gatewayTest\DatabaseMapperTest.class
+utilTest\TypeMappingUtilTest.class
+connectionTest\connectionFactoryTest.class
+metadataTest\ColumnSchemaTest.class
+annotationsTest\EntityAnnotationTest.class
+configTest\PropertyConfigTest.class
+gatewayTest\DataMapperTest.class
+quickTestArea.class

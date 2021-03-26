@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PreparedStatementUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Reform</a> &gt; <a href="index.source.html" class="el_package">org.reform.util</a> &gt; <span class="el_source">PreparedStatementUtil.java</span></div><h1>PreparedStatementUtil.java</h1><pre class="source lang-java linenums">package org.reform.util;
+
+import java.lang.reflect.Field;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class PreparedStatementUtil&lt;T&gt; {
+    private T t;
+<span class="nc" id="L10">    private Integer id = -1;</span>
+
+<span class="nc" id="L12">    public PreparedStatementUtil(T t) {</span>
+<span class="nc" id="L13">        this.t = t;</span>
+<span class="nc" id="L14">    }</span>
+
+<span class="nc" id="L16">    public PreparedStatementUtil(T t, Integer id) {</span>
+<span class="nc" id="L17">        this.t = t;</span>
+<span class="nc" id="L18">        this.id = id;</span>
+<span class="nc" id="L19">    }</span>
+
+    public PreparedStatement setPreparedStatement(PreparedStatement ps) throws IllegalAccessException, SQLException {
+<span class="nc" id="L22">        int index = 1;</span>
+
+<span class="nc" id="L24">        Field[] fields = t.getClass().getDeclaredFields();</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        for (Field f : fields) {</span>
+<span class="nc" id="L26">            f.setAccessible(true);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">            if (!TypeMappingUtil.isPrimitiveType(f.get(t).getClass())) {</span>
+                //TODO: try to add foreign key reference to pet id
+<span class="nc" id="L29">                ps.setObject(index, f.get(t).getClass().getSimpleName());</span>
+            } else {
+<span class="nc" id="L31">                ps.setObject(index, f.get(t));</span>
+            }
+<span class="nc" id="L33">            index++;</span>
+        }
+<span class="nc" id="L35">        ParameterMetaData pmd = ps.getParameterMetaData();</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if(pmd.getParameterCount() &gt; fields.length) {</span>
+<span class="nc" id="L37">            ps.setInt(index,id);</span>
+        }
+<span class="nc" id="L39">        return ps;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

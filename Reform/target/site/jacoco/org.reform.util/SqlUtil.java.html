@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqlUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Reform</a> &gt; <a href="index.source.html" class="el_package">org.reform.util</a> &gt; <span class="el_source">SqlUtil.java</span></div><h1>SqlUtil.java</h1><pre class="source lang-java linenums">package org.reform.util;
+
+import org.reform.metadata.ColumnData;
+import org.reform.metadata.QueryType;
+import org.reform.metadata.TableSchema;
+
+import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+<span class="nc" id="L14">public class SqlUtil {</span>
+
+    public static String sqlColumnFormatting(ColumnData c) {
+<span class="nc" id="L17">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L18">        sb.append(c.getName().toLowerCase(Locale.ROOT) + &quot; &quot;);</span>
+<span class="nc" id="L19">        sb.append(convertDataTypeToSql(c.getType()));</span>
+<span class="nc" id="L20">        sb.append(&quot;, &quot;);</span>
+<span class="nc" id="L21">        return sb.toString();</span>
+    }
+
+    private static final Map&lt;String, String&gt; SQL_TYPE_MAP;
+    static {
+<span class="nc" id="L26">        SQL_TYPE_MAP = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L27">        SQL_TYPE_MAP.put(&quot;string&quot;, &quot;text&quot;);</span>
+<span class="nc" id="L28">        SQL_TYPE_MAP.put(&quot;boolean&quot;, &quot;bit&quot;);</span>
+<span class="nc" id="L29">        SQL_TYPE_MAP.put(&quot;int&quot;, &quot;int&quot;);</span>
+<span class="nc" id="L30">        SQL_TYPE_MAP.put(&quot;integer&quot;,&quot;int&quot;); //for class</span>
+<span class="nc" id="L31">        SQL_TYPE_MAP.put(&quot;long&quot;, &quot;long&quot;);</span>
+<span class="nc" id="L32">        SQL_TYPE_MAP.put(&quot;float&quot;, &quot;real&quot;);</span>
+<span class="nc" id="L33">        SQL_TYPE_MAP.put(&quot;double&quot;, &quot;float&quot;);</span>
+<span class="nc" id="L34">    }</span>
+
+    public static String convertDataTypeToSql(Class c) {
+        //TODO: see if you can work in foreign key
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if(!TypeMappingUtil.isPrimitiveType(c)) {</span>
+<span class="nc" id="L39">            return &quot;text&quot;;</span>
+        }
+        else{
+<span class="nc" id="L42">            return SQL_TYPE_MAP.get(c.getSimpleName().toLowerCase(Locale.ROOT));</span>
+        }
+    }
+
+public static String getBeginningStatement(String tableName, QueryType queryType) {
+<span class="nc" id="L47">        StringBuilder sb = new StringBuilder();</span>
+
+<span class="nc bnc" id="L49" title="All 9 branches missed.">        switch (queryType){</span>
+            case DROP:
+<span class="nc" id="L51">                sb.append(&quot;drop table if exists&quot; + tableName+ &quot; &quot;);</span>
+<span class="nc" id="L52">                break;</span>
+            case ALTER:
+<span class="nc" id="L54">                sb.append(&quot;alter table &quot; + tableName + &quot; &quot;);</span>
+<span class="nc" id="L55">                break;</span>
+            case CREATE:
+<span class="nc" id="L57">                sb.append(&quot;create table if not exists &quot; + tableName + &quot;(id int auto_increment primary key, &quot;);</span>
+<span class="nc" id="L58">                break;</span>
+            case DELETE:
+<span class="nc" id="L60">                sb.append(&quot;delete from &quot; + tableName + &quot; where &quot;);</span>
+<span class="nc" id="L61">                break;</span>
+            case INSERT:
+<span class="nc" id="L63">                sb.append(&quot;insert into &quot; + tableName + &quot; (&quot;);</span>
+<span class="nc" id="L64">                break;</span>
+            case SELECT:
+<span class="nc" id="L66">                sb.append(&quot;select * from &quot; + tableName + &quot; &quot;);</span>
+<span class="nc" id="L67">                break;</span>
+            case UPDATE:
+<span class="nc" id="L69">                sb.append(&quot;update &quot; + tableName + &quot; set &quot;);</span>
+<span class="nc" id="L70">                break;</span>
+            case TRUNCATE:
+<span class="nc" id="L72">                sb.append(&quot;truncate table &quot; + tableName);</span>
+<span class="nc" id="L73">                break;</span>
+            default:
+<span class="nc" id="L75">                return &quot;No matching query type found&quot;;</span>
+        }
+<span class="nc" id="L77">    return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
