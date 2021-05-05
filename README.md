@@ -1,34 +1,12 @@
 # REFORM_P1
 
-1. provide developers the option of file-based
-
-2. Programmatic persistence of entities (basic CRUD support )
-
-3. Basic transaction management (begin, commit, savepoint, rollback)
-
-4. Connection pooling
-
-5. Eagerly loaded database on creation
-
-6. Multithreading support for executing queries
-7. Supports Postgres/MySQL databases
-
-## Tech Stack
-- [ ] Java 8
-- [ ] JUnit
-- [ ] Apache Maven
-- [ ] PostGreSQL deployed on AWS RDS
-- [ ] Git SCM (on GitHub)
-
-
-# REFORM_P1
-
 ## Project Description
 
 REFORM is a lightweight, easy to use ORM Framework that supports programmatic persistence of POJOs. REFORM maps relational data sources to a corresponding relational database model, all without the developer needing to know SQL. 
 
 ## Technologies Used
 
+* Git SCM (on Github)
 * Java - version 8
 * Maven - version 3.6.3
 * PostGreSQL - version 42.2.19
@@ -59,8 +37,7 @@ To-do list:
 
 ```
 > git clone https://github.com/RevatureRobert/REFORM_P1.git
-> ls (Unix/Mac OS)
-> dir (Windows)
+> ls (Unix/Mac OS) or dir (Windows)
 ```
 To check that the repo was cloned correctly, you should see REFORM_P1 within the list of directories and files
 ```
@@ -82,5 +59,7 @@ The packaged JAR file should now be in your target directory.
 ```
 
 > Configure the db.properties file located in ```REFORM_P1/reform/src/main/resources``` to add credentials to the database  you plan to utilize. 
+> 
 > You're now ready to use REFORM!
+> 
 > Mark any POJO you wish to map with an @entity annotation and on the next runtime, you should see your persisted entities now in your database
